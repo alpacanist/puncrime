@@ -81,17 +81,18 @@
                 rs.forEach((r,i) => {
                     var args = r.trim().split(' ');
                     var rule = new Object();
-                    if (args.length == 2)
+                    if (args.length >= 2)
                     {
                         rule.word = args[0];
                         rule.change = args[1];
                     }
-                    else if (args.length == 4)
+                    if (args.length >= 3)
                     {
-                        rule.word = args[0];
-                        rule.change = args[1];
-                        rule.buffer = args[2];
-                        rule.next = parseInt(args[3]);
+                        rule.next = parseInt(args[2]);
+                    }
+                    if (args.length == 4)
+                    {
+                        rule.buffer = args[3];
                     }
                     rules[rule.word] = rule;
                 })
@@ -155,13 +156,15 @@
 
             function jump (n) 
             {
-                clear();
-                line_id = n;
-                play(n);
+                clear().then(() => {
+                    line_id = n;
+                    play(n);
+                });
             }
 
             function play () 
             {
+                console.log("playing");
                 var line = lines[line_id];
 
                 var p_el = document.createElement("p");
@@ -176,11 +179,35 @@
                 add_rules(line.rules);
             }
 
-            function clear ()
+            async function clear ()
             {
+                await fadeout(line_el);
                 line_el.innerHTML = "";
+                line_el.style.opacity = 1;
                 buffer = "";
                 rules = {};
+                console.log("clear done");
+                return;
+            }
+
+            async function fadeout(el)
+            {
+                var op = 1;  // initial opacity
+                var p = new Promise(resolve => {
+                    var timer = setInterval(function () 
+                    {
+                        if (op <= 0.1)
+                        {
+                            clearInterval(timer);
+                            console.log("fadeout done");
+                            resolve();
+                        }
+                        el.style.opacity = op;
+                        el.style.filter = 'alpha(opacity=' + op * 100 + ")";
+                        op -= op * 0.1;
+                    }, 10);
+                });
+                return p;
             }
 
             function follow_rule (sel, rule)
@@ -196,7 +223,11 @@
                 console.log(rule.buffer, buffer)
                 if (rule.buffer && buffer.innerText == rule.buffer)
                 {
-                    setTimeout(()=>{jump(rule.next);}, 500);
+                    setTimeout(() => jump(rule.next), 200);
+                }
+                else if (!rule.buffer && rule.next)
+                {
+                    setTimeout(() => jump(rule.next), 200);
                 }
                 else
                 {
