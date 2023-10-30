@@ -33,9 +33,10 @@
                 -ms-transform: translate(-50%, -50%);
                 transform: translate(-50%, -50%);
                 font-size: 24px;
+                width: 20em;
             }
             p {
-                text-align: center;
+                /* text-align: center; */
             }
             .hint {
                 color: var(--tx-3);
@@ -47,33 +48,47 @@
             .changeling {
                 color: var(--gr);
             }
+            #nav {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                -ms-transform: translate(-50%, 0);
+                transform: translate(-50%, 0);
+                padding: 2em 0;
+            }
+            #nav span {
+                text-decoration: none;
+                color: var(--tx-2);
+                font-size: 18px;
+                cursor: pointer;
+                display: inline-block;
+            }
+            #last-save {
+                color: var(--tx-3) !important;
+                max-width: 10em;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
         </style>
     </head>
     <body>
         <div id="lines"></div>
+        <div id="nav">
+            <span onclick="save()">存档</span>
+            <span id="last-save"></span>
+            <span onclick="load()">读取</span>
+            <span onclick="restart()">重来</span>
+        </div>
         <script>
             const lines = {};
             
             var line_id = 0;
             var buffer = "";
             var rules = {};
+            var save_id = 1;
 
             const line_el = document.querySelector("#lines");
-
-
-
-            fetch('./data.csv')
-            .then(response => response.text())
-            .then((data) => {
-                var arr = data.split("\n");
-                var fields = arr.shift();
-                arr.forEach((e) => {
-                    var obj = csv2obj(fields, e);
-                    lines[obj.id] = obj;
-                })
-                // console.log(lines);
-                init();
-            })
 
             function add_rules (s)
             {
@@ -158,7 +173,7 @@
             {
                 clear().then(() => {
                     line_id = n;
-                    play(n);
+                    play();
                 });
             }
 
@@ -166,6 +181,11 @@
             {
                 console.log("playing");
                 var line = lines[line_id];
+
+                if (line["label"])
+                {
+                    save_id = line_id;
+                }
 
                 var p_el = document.createElement("p");
                 p_el.innerHTML = `${line.line}`;
@@ -236,6 +256,37 @@
                 }
             }
 
+            function save ()
+            {
+                const save_data = {"save_id": save_id};
+                window.localStorage.setItem("puncrime", JSON.stringify(save_data));
+                document.querySelector("#last-save").innerText = lines[save_id].line;
+            }
+
+            function load ()
+            {
+                try
+                {
+                    const load_data = JSON.parse(window.localStorage.getItem("puncrime"));
+                    if (load_data)
+                    {
+                        save_id = parseInt(load_data["save_id"]);
+                        document.querySelector("#last-save").innerText = lines[save_id].line;
+                        jump(save_id);
+                    }
+                }
+                catch(e)
+                {
+                    console.log(e);
+                    restart();
+                }
+            }
+
+            function restart()
+            {
+                jump(1);
+            }
+
             window.onmouseup = function (e)
             {
                 var selection = window.getSelection();
@@ -256,6 +307,23 @@
                     case 32:
                         next();
                 }
+            }
+
+            window.onload = function ()
+            {
+                fetch('./data.csv')
+                .then(response => response.text())
+                .then((data) => {
+                    var arr = data.split("\n");
+                    var fields = arr.shift();
+                    arr.forEach((e) => {
+                        var obj = csv2obj(fields, e);
+                        lines[obj.id] = obj;
+                    })
+                    // console.log(lines);
+                    // init();
+                    load();
+                })
             }
         </script>
     </body>
