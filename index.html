@@ -65,7 +65,7 @@
             }
             #last-save {
                 color: var(--tx-3) !important;
-                max-width: 10em;
+                max-width: 16em;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
@@ -185,6 +185,7 @@
                 if (line["label"])
                 {
                     save_id = line_id;
+                    // save();
                 }
 
                 var p_el = document.createElement("p");
@@ -256,11 +257,16 @@
                 }
             }
 
+            function show_save ()
+            {
+                document.querySelector("#last-save").innerText = `（上次存档：${lines[save_id].line}）`;
+            }
+
             function save ()
             {
                 const save_data = {"save_id": save_id};
                 window.localStorage.setItem("puncrime", JSON.stringify(save_data));
-                document.querySelector("#last-save").innerText = lines[save_id].line;
+                show_save();
             }
 
             function load ()
@@ -271,7 +277,7 @@
                     if (load_data)
                     {
                         save_id = parseInt(load_data["save_id"]);
-                        document.querySelector("#last-save").innerText = lines[save_id].line;
+                        show_save();
                         jump(save_id);
                     }
                 }
