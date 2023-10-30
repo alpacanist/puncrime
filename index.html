@@ -83,10 +83,10 @@
         <script>
             const lines = {};
             
-            var line_id = 0;
+            var idx = 0;
             var buffer = "";
             var rules = {};
-            var save_id = 1;
+            var label = "1";
 
             const line_el = document.querySelector("#lines");
 
@@ -103,7 +103,7 @@
                     }
                     if (args.length >= 3)
                     {
-                        rule.next = parseInt(args[2]);
+                        rule.next = args[2];
                     }
                     if (args.length == 4)
                     {
@@ -151,42 +151,33 @@
 
             function next ()
             {
-                if (line_id == -1)
+                if (!(label in lines))
                     return;
-                var prev = lines[line_id];
-                var next = prev ? prev.next : undefined;
-                if (next)
-                {
-                    line_id = next;
-                }
-                else
-                {
-                    line_id++;
-                }
-                if (line_id == -1)
+                if (idx >= lines[label].length)
                     return;
-
+                var prev = lines[label][idx];
+                if (prev.next)
+                {
+                    label = prev.next;
+                    idx = 0;
+                }
                 play();
+                idx++;
             }
 
-            function jump (n) 
+            function jump (lbl) 
             {
                 clear().then(() => {
-                    line_id = n;
-                    play();
+                    label = lbl;
+                    idx = 0;
+                    next();
                 });
             }
 
             function play () 
             {
                 console.log("playing");
-                var line = lines[line_id];
-
-                if (line["label"])
-                {
-                    save_id = line_id;
-                    // save();
-                }
+                var line = lines[label][idx];
 
                 var p_el = document.createElement("p");
                 p_el.innerHTML = `${line.line}`;
@@ -244,11 +235,11 @@
                 console.log(rule.buffer, buffer)
                 if (rule.buffer && buffer.innerText == rule.buffer)
                 {
-                    setTimeout(() => jump(rule.next), 200);
+                    setTimeout(() => jump(rule.next), 500);
                 }
                 else if (!rule.buffer && rule.next)
                 {
-                    setTimeout(() => jump(rule.next), 200);
+                    setTimeout(() => jump(rule.next), 500);
                 }
                 else
                 {
@@ -259,12 +250,12 @@
 
             function show_save ()
             {
-                document.querySelector("#last-save").innerText = `（上次存档：${lines[save_id].line}）`;
+                document.querySelector("#last-save").innerText = `（上次存档：${lines[label][0].line}）`;
             }
 
             function save ()
             {
-                const save_data = {"save_id": save_id};
+                const save_data = {"label": label};
                 window.localStorage.setItem("puncrime", JSON.stringify(save_data));
                 show_save();
             }
@@ -276,9 +267,9 @@
                     const load_data = JSON.parse(window.localStorage.getItem("puncrime"));
                     if (load_data)
                     {
-                        save_id = parseInt(load_data["save_id"]);
+                        label = load_data["label"];
                         show_save();
-                        jump(save_id);
+                        jump(label);
                     }
                 }
                 catch(e)
@@ -290,7 +281,7 @@
 
             function restart()
             {
-                jump(1);
+                jump("1");
             }
 
             window.onmouseup = function (e)
@@ -322,9 +313,17 @@
                 .then((data) => {
                     var arr = data.split("\n");
                     var fields = arr.shift();
+                    var cur_label = "";
                     arr.forEach((e) => {
                         var obj = csv2obj(fields, e);
-                        lines[obj.id] = obj;
+                        if (obj.label)
+                        {
+                            cur_label = obj.label;
+                            lines[cur_label] = [];
+                        }
+                        if (cur_label)
+                            lines[cur_label].push(obj);
+                        // lines[obj.id] = obj;
                     })
                     // console.log(lines);
                     // init();
