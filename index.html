@@ -271,6 +271,10 @@
                         show_save();
                         jump(label);
                     }
+                    else
+                    {
+                        restart();
+                    }
                 }
                 catch(e)
                 {
@@ -286,9 +290,12 @@
 
             window.onmouseup = function (e)
             {
+                next();
                 var selection = window.getSelection();
                 if (!selection.rangeCount)
+                {
                     return;
+                }
                 var text = selection.toString();
                 if (text in rules)
                 {
