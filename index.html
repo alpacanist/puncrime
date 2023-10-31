@@ -155,14 +155,14 @@
                     return;
                 if (idx >= lines[label].length)
                     return;
-                var prev = lines[label][idx];
-                if (prev.next)
-                {
-                    label = prev.next;
-                    idx = 0;
-                }
+                var now = lines[label][idx];
                 play();
                 idx++;
+                if (now.next)
+                {
+                    label = now.next;
+                    idx = 0;
+                }
             }
 
             function jump (lbl) 
@@ -290,7 +290,6 @@
 
             window.onmouseup = function (e)
             {
-                next();
                 var selection = window.getSelection();
                 if (!selection.rangeCount)
                 {
@@ -300,6 +299,10 @@
                 if (text in rules)
                 {
                     follow_rule(selection, rules[text]);
+                }
+                else
+                {
+                    next();
                 }
                 selection.removeAllRanges();
             }
