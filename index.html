@@ -165,8 +165,8 @@
                 idx++;
                 if (now.next)
                 {
-                    label = now.next;
-                    idx = 0;
+                    console.log("jump");
+                    jump(now.next);
                 }
             }
 
@@ -185,15 +185,22 @@
                 var line = lines[_label][_idx];
 
                 var p_el = document.createElement("p");
-                p_el.innerHTML = `${line.line}`;
-                line_el.appendChild(p_el);
-
-                if (line.line.startsWith('（'))
+                var text = line.line;
+                if (text.startsWith('（'))
                 {
                     p_el.classList.add("hint");
+                    text = text.slice(1,-1);
                 }
+                p_el.innerHTML = `${text}`;
+                line_el.appendChild(p_el);
+
 
                 add_rules(line.rules);
+            }
+
+            function end()
+            {
+
             }
 
             async function clear ()
@@ -229,6 +236,8 @@
 
             function follow_rule (sel, rule)
             {
+                if (sel.anchorNode.parentNode.classList.contains('hint'))
+                    return;
                 range = sel.getRangeAt(0);
                 range.deleteContents();
                 var el = document.createElement("span");
@@ -325,7 +334,8 @@
                 }
                 else
                 {
-                    next();
+                    if(selection.anchorNode.nodeType != 3)
+                        next();
                 }
                 selection.removeAllRanges();
             }
