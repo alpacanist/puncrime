@@ -195,7 +195,7 @@
                     var now = lines[label][idx-1];
                     if (now.next)
                     {
-                        console.log("jump");
+                        // console.log("jump");
                         if (now.next.startsWith("end"))
                             end(now.next);
                         else
@@ -221,7 +221,7 @@
 
             function play (_label, _idx) 
             {
-                console.log(_label, _idx);
+                // console.log(_label, _idx);
                 var line = lines[_label][_idx];
 
                 var p_el = document.createElement("p");
@@ -251,7 +251,7 @@
                 line_el.style.opacity = 1;
                 buffer = "";
                 rules = {};
-                console.log("clear done");
+                // console.log("clear done");
                 return;
             }
 
@@ -264,7 +264,7 @@
                         if (op <= 0.1)
                         {
                             clearInterval(timer);
-                            console.log("fadeout done");
+                            // console.log("fadeout done");
                             resolve();
                         }
                         el.style.opacity = op;
@@ -287,7 +287,7 @@
                 range.insertNode(el);
                 sel.removeAllRanges();
 
-                console.log(rule.buffer, buffer.innerText)
+                // console.log(rule.buffer, buffer.innerText)
                 if (rule.buffer && buffer.innerText == rule.buffer)
                 {
                     setTimeout(() => jump(rule.next), 500);
