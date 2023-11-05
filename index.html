@@ -81,9 +81,9 @@
             <span onclick="restart()">重来</span>
             <!-- <span onclick="menu('挣扎')">挣扎</span> -->
             <!-- <span onclick="menu('发声')">发声</span> -->
-            <span onclick="">你的手</span>
-            <span onclick="">你的眼</span>
-            <span onclick="">你的嘴</span>
+            <!-- <span onclick="">你的手</span> -->
+            <!-- <span onclick="">你的眼</span> -->
+            <!-- <span onclick="">你的嘴</span> -->
         </div>
         <script>
             const lines = {};
@@ -326,7 +326,7 @@
 
             function restart()
             {
-                jump("1");
+                jump("0");
             }
 
             window.onmouseup = function (e)
@@ -337,13 +337,14 @@
                     return;
                 }
                 var text = selection.toString();
-                if (text in rules)
-                {
-                    follow_rule(selection, rules[text]);
-                }
-                else if (buffer && (text + buffer.innerText) in rules)
+                
+                if (buffer && (text + buffer.innerText) in rules)
                 {
                     follow_rule(selection, rules[text + buffer.innerText]);
+                }
+                else if (text in rules)
+                {
+                    follow_rule(selection, rules[text]);
                 }
                 else
                 {
