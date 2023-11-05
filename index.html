@@ -15,6 +15,7 @@
                 --tx-2: #6F6E69;
                 --tx: #100F0F;
                 --gr: #66800B;
+                --re: #AF3029;
             }
             body {
                 font-family: Georgia, 'Times New Roman', Times, serif;
@@ -46,11 +47,11 @@
                 color: var(--bg-2);
             }
             .changeling {
-                color: var(--gr);
+                color: var(--re);
             }
             #nav {
                 position: absolute;
-                bottom: 0;
+                bottom: 2em;
                 left: 50%;
                 -ms-transform: translate(-50%, 0);
                 transform: translate(-50%, 0);
@@ -70,6 +71,30 @@
                 white-space: nowrap;
                 text-overflow: ellipsis;
             }
+            #progress {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                height: 1.2em;
+                background-color: var(--ui-2);
+            }
+            #percent {
+                width: 0;
+                height: 1.2em;
+                background-color: var(--re);
+                color: var(--bg);
+                text-align: center;
+            }
+
+            @media only screen and (max-width: 600px) {
+                #lines {
+                    width: 90%;
+                    top: 0;
+                    -ms-transform: translate(-50%, 0);
+                    transform: translate(-50%, 0);
+                }
+            }
+            
         </style>
     </head>
     <body>
@@ -85,6 +110,9 @@
             <!-- <span onclick="">你的眼</span> -->
             <!-- <span onclick="">你的嘴</span> -->
         </div>
+        <div id="progress">
+            <div id="percent">0%</div>
+        </div>
         <script>
             const lines = {};
             
@@ -92,6 +120,7 @@
             var buffer = "";
             var rules = {};
             var label = "1";
+            var progress = new Set();
 
             const line_el = document.querySelector("#lines");
 
@@ -182,6 +211,8 @@
             function jump (lbl) 
             {
                 clear().then(() => {
+                    progress.add(lbl);
+                    update_bar();
                     label = lbl;
                     idx = 0;
                     next();
@@ -207,9 +238,10 @@
                 add_rules(line.rules);
             }
 
-            function end(name)
+            async function end(name)
             {
                 restart();
+                save();
             }
 
             async function clear ()
@@ -271,6 +303,16 @@
                 }
             }
 
+            function update_bar ()
+            {
+                var per = progress.size / 52.0 * 100;
+                per = Math.ceil(per);
+                per = Math.min(Math.max(per, 0), 100);
+                var el = document.querySelector("#percent");
+                el.style.width = `${per}%`;
+                el.innerHTML = `${per}%`;
+            }
+
             // 菜单功能
             function menu(text)
             {
@@ -296,7 +338,7 @@
 
             function save ()
             {
-                const save_data = {"label": label};
+                const save_data = {"label": label, "progress": Array.from(progress)};
                 window.localStorage.setItem("puncrime", JSON.stringify(save_data));
                 show_save();
             }
@@ -309,6 +351,7 @@
                     if (load_data)
                     {
                         label = load_data["label"];
+                        progress = new Set(load_data["progress"]);
                         show_save();
                         jump(label);
                     }
